@@ -37,6 +37,9 @@ def callback():
 
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_message(event):
+    message_content = line_bot_api.get_message_content(message_id=event.message.id)
+    print(type(message_content))
+
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text="画像を保存しました。")
