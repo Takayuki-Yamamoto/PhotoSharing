@@ -1,1 +1,1 @@
-web: gunicorn PhoroSharing:app --log-file=-
+web: gunicorn PhotoSharing:app --log-file=-
