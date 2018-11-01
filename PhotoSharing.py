@@ -54,9 +54,9 @@ def handle_message(event):
     ext = 'jpg'
     message_content = line_bot_api.get_message_content(
         message_id=event.message.id)
+    print(static_tmp_path)
 
-    with tempfile.NamedTemporaryFile(dir=static_tmp_path, prefix=ext + '-',
-                                     delete=False) as tf:
+    with tempfile.NamedTemporaryFile(dir=static_tmp_path, prefix=ext + '-', delete=False) as tf:
         for chunk in message_content.iter_content():
             tf.write(chunk)
         tempfile_path = tf.name
@@ -65,10 +65,15 @@ def handle_message(event):
     dist_name = os.path.basename(dist_path)
     os.rename(tempfile_path, dist_path)
 
+    # line_bot_api.reply_message(
+    #     event.reply_token,
+    #     TextSendMessage(text="画像を保存しました。")
+    # )
     line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text="画像を保存しました。")
-    )
+        event.reply_token, [
+            TextSendMessage(text='Save content.'),
+            TextSendMessage(text=request.host_url + os.path.join('static', 'tmp', dist_name))
+        ])
 
 
 if __name__ == '__main__':
