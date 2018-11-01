@@ -19,16 +19,6 @@ line_bot_api = LineBotApi(ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
 
-def make_static_tmp_dir():
-    try:
-        os.makedirs(static_tmp_path)
-    except OSError as exc:
-        if exc.errno == errno.EEXIST and os.path.isdir(static_tmp_path):
-            pass
-        else:
-            raise
-
-
 @app.route('/')
 def index():
     return 'This is photo sharing api'
@@ -77,7 +67,13 @@ def handle_message(event):
 
 
 if __name__ == '__main__':
-    make_static_tmp_dir()
+    try:
+        os.makedirs(static_tmp_path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(static_tmp_path):
+            pass
+        else:
+            raise
 
     port = int(os.getenv("PORT"))
     app.run(host="0.0.0.0", port=port)
