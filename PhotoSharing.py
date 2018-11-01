@@ -19,6 +19,16 @@ line_bot_api = LineBotApi(ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
 
+def make_static_tmp_dir():
+    try:
+        os.makedirs(static_tmp_path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(static_tmp_path):
+            pass
+        else:
+            raise
+
+
 @app.route('/')
 def index():
     return 'This is photo sharing api'
@@ -44,9 +54,12 @@ def handle_message(event):
     ext = 'jpg'
     message_content = line_bot_api.get_message_content(
         message_id=event.message.id)
-    print(static_tmp_path)
 
-    with tempfile.NamedTemporaryFile(dir=static_tmp_path, prefix=ext + '-', delete=False) as tf:
+    if not os.path.exists(static_tmp_path):
+        make_static_tmp_dir()
+
+    with tempfile.NamedTemporaryFile(dir=static_tmp_path, prefix=ext + '-',
+                                     delete=False) as tf:
         for chunk in message_content.iter_content():
             tf.write(chunk)
         tempfile_path = tf.name
@@ -55,21 +68,15 @@ def handle_message(event):
     dist_name = os.path.basename(dist_path)
     os.rename(tempfile_path, dist_path)
 
-    # line_bot_api.reply_message(
-    #     event.reply_token,
-    #     TextSendMessage(text="画像を保存しました。")
-    # )
     line_bot_api.reply_message(
         event.reply_token, [
             TextSendMessage(text='Save content.'),
-            TextSendMessage(text=request.host_url + os.path.join('static', 'tmp', dist_name))
+            TextSendMessage(
+                text=request.host_url + os.path.join('static', 'tmp',
+                                                     dist_name))
         ])
 
 
 if __name__ == '__main__':
-    print(os.path.dirname(__file__))
-    os.makedirs(static_tmp_path)
-    print(static_tmp_path)
-
     port = int(os.getenv("PORT"))
     app.run(host="0.0.0.0", port=port)
