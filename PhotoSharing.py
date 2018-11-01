@@ -51,6 +51,7 @@ def callback():
 
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_message(event):
+    ext = 'jpg'
     message_content = line_bot_api.get_message_content(
         message_id=event.message.id)
 
@@ -60,7 +61,7 @@ def handle_message(event):
             tf.write(chunk)
         tempfile_path = tf.name
 
-    dist_path = tempfile_path + '.jpg'
+    dist_path = tempfile_path + '.' + ext
     dist_name = os.path.basename(dist_path)
     os.rename(tempfile_path, dist_path)
 
